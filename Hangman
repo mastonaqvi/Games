@@ -1,0 +1,116 @@
+#include <iostream>
+using namespace std;
+
+int main() {
+    const int wordLength = 10;
+    const int numberOfWords = 10;
+    char correct[wordLength];
+    char fill[wordLength];
+    char words[numberOfWords][wordLength] = {
+        "pakistan",
+        "germany",
+        "brazil",
+        "france",
+        "italy",
+        "canada",
+        "mexico",
+        "norway",
+        "sweden",
+        "japan"
+    };
+
+    // Simple random selection without using additional libraries
+    int randomIndex = (time(0) % numberOfWords); // Using time for simple randomness
+
+    // Copy selected word to 'word' array
+    char word[wordLength];
+    for (int i = 0; i < wordLength; i++) {
+        word[i] = words[randomIndex][i];
+        fill[i] = (word[i] != '\0') ? '_' : '\0';
+    }
+
+    int attempts = 9;
+
+    cout << "Here is the number of letters in the word you have to guess: " << endl;
+    for (int i = 0; i < wordLength && word[i] != '\0'; i++) {
+        cout << "_ ";
+    }
+    cout << endl;
+    cout << "You are supposed to guess in 9 attempts." << endl;
+    cout << "Type a letter in the word or $ to skip the rest of the guess attempts and type the complete word you want to guess." << endl;
+
+    for (int ii = 1; ii <= attempts; ii++) {
+        cout << "Enter your guess #" << ii << ": ";
+        char letter;
+        cin >> letter;
+
+        if (letter == '$') {
+            cout << "Enter the correct word: ";
+            for (int i = 0; i < wordLength && word[i] != '\0'; i++) {
+                cin >> correct[i];
+            }
+            bool isCorrect = true;
+            for (int i = 0; i < wordLength && word[i] != '\0'; i++) {
+                if (correct[i] != word[i]) {
+                    isCorrect = false;
+                    break;
+                }
+            }
+            if (isCorrect) {
+                cout << "Well done!" << endl;
+            } else {
+                cout << "You lost the game." << endl;
+            }
+            break;
+        } else {
+            bool found = false;
+            for (int j = 0; j < wordLength && word[j] != '\0'; j++) {
+                if (letter == word[j]) {
+                    fill[j] = letter;
+                    found = true;
+                }
+            }
+
+            if (found) {
+                for (int x = 0; x < wordLength && fill[x] != '\0'; x++) {
+                    cout << fill[x] << " ";
+                }
+                cout << endl;
+            } else {
+                cout << "This is a wrong letter." << endl;
+            }
+
+            bool isComplete = true;
+            for (int i = 0; i < wordLength && word[i] != '\0'; i++) {
+                if (fill[i] != word[i]) {
+                    isComplete = false;
+                    break;
+                }
+            }
+            if (isComplete) {
+                cout << "Well done!" << endl;
+                break;
+            }
+
+            if (ii == attempts) {
+                cout << "Sorry, you are out of guesses. Now type the correct word: ";
+                for (int i = 0; i < wordLength && word[i] != '\0'; i++) {
+                    cin >> correct[i];
+                }
+                bool isCorrect = true;
+                for (int i = 0; i < wordLength && word[i] != '\0'; i++) {
+                    if (correct[i] != word[i]) {
+                        isCorrect = false;
+                        break;
+                    }
+                }
+                if (isCorrect) {
+                    cout << "Well done!" << endl;
+                } else {
+                    cout << "You lost the game." << endl;
+                }
+            }
+        }
+    }
+    return 0;
+}
