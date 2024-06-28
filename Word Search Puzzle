@@ -1,22 +1,320 @@
 #include <iostream>
 #include <fstream>
+
 using namespace std;
-int main(){
+
+const int board_size = 15;
+char board[board_size][board_size];
+
+
+int level;
+int score = 0;
+void dataread()
+{
+    ifstream in;
+    in.open("board.txt");
+    
+
+    if(in){
+        for(int i=0; i<board_size; i++){
+            for(int j=0; j<board_size; j++)
+            {
+                in>>board[i][j];
+            }
+        }
+        
+    }else{
+        cout<<"File Does Not Open: ";
+    }
+}
+
+void dispalyboard()
+{
+    for(int i=0; i<board_size; i++){
+        for(int j=0; j<board_size; j++){
+            cout<<board[i][j]<<" ";
+        }
+         cout<<endl;
+    }
+   
+}
+
+
+
+bool verifyWord(const char* word) {
+    ifstream in;
+    in.open("dictionary.txt");
+    char dicword[50]; 
+    if (in) {
+        while (in >> dicword) {
+            int i = 0;
+            while (word[i] != '\0' && word[i] == dicword[i]) 
+            {
+                i++;
+            }
+            if (word[i] == '\0' && dicword[i] == '\0')
+             {
+                return true;
+            }
+        }
+        return false;
+    } else {
+        cout << "Dictionary File  Not Open: ";
+        return false;
+    }
+}
+
+
+bool findinboard(char*word) 
+{
+    int len = 0;
+    while (word[len] != '\0') 
+    len++;
+
+    for (int i = 0; i < board_size; i++) {
+        for (int j = 0; j < board_size; j++) 
+        {
+         
+            if (level == 1) 
+            {
+                
+                if (j <= board_size - len) 
+                {
+                    int k = 0;
+                    while (k < len && board[i][j + k] == word[k]) 
+                    k++;
+                    if (k == len)
+                     {
+                        return true;
+                    }
+                }
+               
+        if (i <= board_size - len) {
+                    int k = 0;
+                    while (k < len && board[i + k][j] == word[k]) 
+                    k++;
+                 if (k == len) {
+                        return true;
+                    }
+                }
+            }
+
+            
+            if (level == 2) {
+                
+                if (j <= board_size - len) {
+                    int k = 0;
+                    while (k < len && board[i][j + k] == word[k]) 
+                    k++;
+                    if (k == len) {
+                        return true;
+                    }
+                }
+                
+       if (j >= len - 1) {
+         int k = 0;
+                 while (k < len && board[i][j - k] == word[k])
+                  k++;
+           if (k == len) {
+                    return true;
+                    }
+                }
+               
+                if (i <= board_size - len) {
+                    int k = 0;
+                    while (k < len && board[i + k][j] == word[k]) 
+                    k++;
+                    if (k == len) {
+                         return true;
+                    }
+                }
+                
+                if (i >= len - 1) 
+                {
+                int k = 0;
+            while (k < len && board[i - k][j] == word[k]) 
+            k++;
+                    if (k == len) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void savescore(char* playerName) 
+{
+    const int highscore = 3;
+    char names[highscore][50]; 
+    int scores[highscore];
+    int count = 0;
+    int cruntscore;
 
     ifstream in;
-    in.open("data.txt");
+    in.open("highrecord.txt");
     if(in){
-        
+    char name[50];
+    int score;
+    while (in >> name >> score) {
+        if (count < highscore) {
+            int i = 0;
+            while (name[i] != '\0') {
+                names[count][i] = name[i];
+                i++;
+            }
+            names[count][i] = '\0';
+            scores[count] = score;
+            count++;
+        }
+    }
+    }  
+    in.close();
 
+    int i = 0;
+    while (playerName[i] != '\0') {
+        names[count][i] = playerName[i];
+        i++;
+    }
+    names[count][i] = '\0';
+    scores[count] = cruntscore;
+    count++;
+
+
+    ofstream out;
+    out.open("highrecord.txt");
+    if(out){
+    for (int i = 0; i < highscore && i < count; i++) {
+        out << names[i] << ' ' << scores[i] << endl;
+    }
     }else{
-        cout<<"File Does Not Open";
+        cout<<"High Record FILE Does NOt OPEN "<<endl;
+    }
+}
+
+void displayscores() 
+{
+    ifstream in;
+    in.open("highrecord.txt");
+    if(in){
+    char name[50];
+    int score;
+    while (in >> name >> score) {
+        cout << name << ": " << score << endl;
+    }
+}else{
+    cout<<"High REcord File Not open";
+}
+}
+
+void newGame(char* playerName)
+ {
+    dataread();
+    dispalyboard();
+    int lives = 2;
+    char word[50];
+    
+    ofstream out;
+
+    out.open("pausedgame.txt");
+    if(out){
+        while (lives > 0) {
+        cout << "Enter a word to search (or 'p' to pause): ";
+        cin >> word;
+
+        if (word[0] == 'p' && word[1] == '\0') {
+           
+            for (int i = 0; i < board_size; i++) {
+                for (int j = 0; j < board_size; j++) {
+                    out << board[i][j];
+                }
+                out << endl;
+            }
+            cout << "Game paused." << endl;
+            return;
+        }
+
+        if (verifyWord(word)) {
+            if (findinboard(word)) {
+                cout << "Word found" << endl;
+                score=score + 10;
+            } else {
+                cout << "Word not found" << endl;
+                lives--;
+            }
+        } else {
+            cout << "Word not in dictionary" << endl;
+            lives--;
+        }
+
+        cout << "Lives: " << lives << "  Score: " << score << endl;
     }
 
+    cout << "Game over" << endl;
+    savescore(playerName);
+}
 
 
+    } 
+    
+    
+void resumeGame(char* playerName) {
+    ifstream in;
+    in.open("pausedgame.txt");
+    if (in) {
+        for (int i = 0; i < board_size; i++) {
+            for (int j = 0; j < board_size; j++) 
+            {
+                in >> board[i][j];
+            }
+        }
+    } else {
+        cout << "No paused game found." << endl;
+    }
 
+    dispalyboard();
+    newGame(playerName);
+}
 
+int main() {
+    char select;
+    char playerName[50];
+    while(true){
+   
+        cout << "N or n for new game: "<<endl;
+        cout << "R or r for resume game: "<<endl;
+        cout << "H or h for high score: "<<endl;
+        cout << "E or e for exit: "<<endl;
+        cin >> select;
 
+    switch (select) {
+            case 'n':
+            case 'N':
 
+            cout << "Enter your name: ";
+            cin >> playerName;
+                cout << "Select level (1 for Easy, 2 for Intermediate): ";
+                cin >> level;
+                newGame(playerName);
+            break;
+             case 'r':
+            case 'R':
+                cout << "Enter your name to resume: ";
+                cin >> playerName;
+                resumeGame(playerName);
+                break;
+            case 'h':
+            case 'H':
+            displayscores();
+                break;
+            case 'e':
+            case 'E':
+                return 0;
+            default:
+                
+                break;
+       }
+    }
     return 0;
 }
